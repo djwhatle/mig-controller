@@ -20,8 +20,10 @@ import (
 	"context"
 
 	migapi "github.com/fusor/mig-controller/pkg/apis/migration/v1alpha1"
+	"github.com/fusor/mig-controller/pkg/util"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -109,6 +111,10 @@ type ReconcileMigPlan struct {
 // +kubebuilder:rbac:groups=migration.openshift.io,resources=migplans,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=migration.openshift.io,resources=migplans/status,verbs=get;update;patch
 func (r *ReconcileMigPlan) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+	// Set up ResourceParentsMap to manage parent-child mapping
+	rpm := util.GetResourceParentsMap()
+	parentMigPlan := util.KubeResource{Kind: util.KindMigPlan, NsName: request.NamespacedName}
+
 	// Fetch the MigPlan instance
 	plan := &migapi.MigPlan{}
 	err := r.Get(context.TODO(), request.NamespacedName, plan)
@@ -121,6 +127,43 @@ func (r *ReconcileMigPlan) Reconcile(request reconcile.Request) (reconcile.Resul
 		// Error reading the object - requeue the request.
 		return reconcile.Result{}, err
 	}
+
+	// Add all referenced
+	childSrcCluster := util.KubeResource{
+		Kind: util.KindMigCluster,
+		NsName: types.NamespacedName{
+			Name:      plan.Spec.SrcClusterRef.Name,
+			Namespace: plan.Spec.SrcClusterRef.Namespace,
+		},
+	}
+	rpm.AddChildToParent(childSrcCluster, parentMigPlan)
+
+	childDestCluster := util.KubeResource{
+		Kind: util.KindMigCluster,
+		NsName: types.NamespacedName{
+			Name:      plan.Spec.DestClusterRef.Name,
+			Namespace: plan.Spec.DestClusterRef.Namespace,
+		},
+	}
+	rpm.AddChildToParent(childDestCluster, parentMigPlan)
+
+	childMigStorage := util.KubeResource{
+		Kind: util.KindMigStorage,
+		NsName: types.NamespacedName{
+			Name:      plan.Spec.MigStorageRef.Name,
+			Namespace: plan.Spec.MigStorageRef.Namespace,
+		},
+	}
+	rpm.AddChildToParent(childMigStorage, parentMigPlan)
+
+	childMigAssets := util.KubeResource{
+		Kind: util.KindMigAssetCollection,
+		NsName: types.NamespacedName{
+			Name:      plan.Spec.MigAssetCollectionRef.Name,
+			Namespace: plan.Spec.MigAssetCollectionRef.Namespace,
+		},
+	}
+	rpm.AddChildToParent(childMigAssets, parentMigPlan)
 
 	// Validations.
 	// The 'nSet' is the number of conditions set during validation.

@@ -136,7 +136,7 @@ func (r *ReconcileMigStage) Reconcile(request reconcile.Request) (reconcile.Resu
 	migPlan := &migapi.MigPlan{}
 	err = r.Get(context.TODO(), types.NamespacedName{Name: migPlanRef.Name, Namespace: migPlanRef.Namespace}, migPlan)
 	if err != nil {
-		log.Info(fmt.Sprintf("[mStage] Error getting MigPlan [%s/%s]", migPlanRef.Name, migPlanRef.Namespace))
+		log.Info(fmt.Sprintf("[mStage] Error getting MigPlan [%s/%s]", migPlanRef.Namespace, migPlanRef.Name))
 		if errors.IsNotFound(err) {
 			return reconcile.Result{}, nil // don't requeue
 		}
@@ -156,7 +156,7 @@ func (r *ReconcileMigStage) Reconcile(request reconcile.Request) (reconcile.Resu
 	// Check for 'Ready' condition on referenced MigPlan
 	_, migPlanReady := migPlan.Status.FindCondition(migplan.Ready)
 	if migPlanReady == nil {
-		log.Info(fmt.Sprintf("[mStage] Referenced MigPlan [%s/%s] was not ready.", migPlanRef.Name, migPlanRef.Namespace))
+		log.Info(fmt.Sprintf("[mStage] Referenced MigPlan [%s/%s] was not ready.", migPlanRef.Namespace, migPlanRef.Name))
 		return reconcile.Result{}, nil // don't requeue
 	}
 
@@ -169,7 +169,7 @@ func (r *ReconcileMigStage) Reconcile(request reconcile.Request) (reconcile.Resu
 	assets := &migapi.MigAssetCollection{}
 	err = r.Get(context.TODO(), types.NamespacedName{Name: assetsRef.Name, Namespace: assetsRef.Namespace}, assets)
 	if err != nil {
-		log.Info(fmt.Sprintf("[mStage] Error getting MigAssetCollection [%s/%s]", assetsRef.Name, assetsRef.Namespace))
+		log.Info(fmt.Sprintf("[mStage] Error getting MigAssetCollection [%s/%s]", assetsRef.Namespace, assetsRef.Name))
 		if errors.IsNotFound(err) {
 			return reconcile.Result{}, nil // don't requeue
 		}
@@ -179,7 +179,7 @@ func (r *ReconcileMigStage) Reconcile(request reconcile.Request) (reconcile.Resu
 	// Check for 'Ready' condition on referenced MigAssetCollection
 	_, assetsReady := assets.Status.FindCondition(migassetcollection.Ready)
 	if assetsReady == nil {
-		log.Info(fmt.Sprintf("[mStage] Referenced MigAssetCollection [%s/%s] was not ready.", assetsRef.Name, assetsRef.Namespace))
+		log.Info(fmt.Sprintf("[mStage] Referenced MigAssetCollection [%s/%s] was not ready.", assetsRef.Namespace, assetsRef.Name))
 		return reconcile.Result{}, nil // don't requeue
 	}
 
@@ -192,7 +192,7 @@ func (r *ReconcileMigStage) Reconcile(request reconcile.Request) (reconcile.Resu
 	srcCluster := &migapi.MigCluster{}
 	err = r.Get(context.TODO(), types.NamespacedName{Name: srcClusterRef.Name, Namespace: srcClusterRef.Namespace}, srcCluster)
 	if err != nil {
-		log.Info(fmt.Sprintf("[mStage] Error getting srcCluster MigCluster [%s/%s]", srcClusterRef.Name, srcClusterRef.Namespace))
+		log.Info(fmt.Sprintf("[mStage] Error getting srcCluster MigCluster [%s/%s]", srcClusterRef.Namespace, srcClusterRef.Name))
 		if errors.IsNotFound(err) {
 			return reconcile.Result{}, nil // don't requeue
 		}

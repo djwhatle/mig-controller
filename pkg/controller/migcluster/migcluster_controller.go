@@ -59,7 +59,7 @@ func add(mgr manager.Manager, r *ReconcileMigCluster) error {
 	}
 
 	// Add reference to controller on ReconcileMigCluster object to be used
-	// for adding remote watches at a later time
+	// for adding Remote Watches at a later time
 	r.Controller = c
 
 	// Watch for changes to MigCluster
@@ -126,8 +126,7 @@ func (r *ReconcileMigCluster) Reconcile(request reconcile.Request) (reconcile.Re
 	}
 
 	// Check if this cluster is also hosting the controller
-	isHostCluster := instance.Spec.IsHostCluster
-	log.Info(fmt.Sprintf("[mCluster] isHostCluster: [%v]", isHostCluster))
+	// isHostCluster := instance.Spec.IsHostCluster
 
 	// Get the SA secret attached to MigCluster
 	saSecretRef := instance.Spec.ServiceAccountSecretRef
@@ -185,7 +184,6 @@ func (r *ReconcileMigCluster) Reconcile(request reconcile.Request) (reconcile.Re
 	k8sEndpoints := crCluster.Spec.KubernetesAPIEndpoints.ServerEndpoints
 	if len(k8sEndpoints) > 0 {
 		remoteClusterURL = string(k8sEndpoints[0].ServerAddress)
-		log.Info(fmt.Sprintf("[mCluster] remoteClusterURL: [%s]", remoteClusterURL))
 	} else {
 		log.Info(fmt.Sprintf("[mCluster] remoteClusterURL: [len=0]"))
 	}
