@@ -17,7 +17,6 @@ limitations under the License.
 package util
 
 import (
-	"fmt"
 	"sync"
 
 	"k8s.io/apimachinery/pkg/types"
@@ -174,7 +173,7 @@ func MapChildToParents(a handler.MapObject, childKind string, parentKind string)
 
 	// Log request redirection if at least 1 request was redirected
 	if len(requests) > 0 {
-		log.Info(fmt.Sprintf("[mapFn] %s => %s", childKind, parentKind))
+		// log.Info(fmt.Sprintf("[mapFn] %s => %s", childKind, parentKind))
 	}
 
 	return requests
