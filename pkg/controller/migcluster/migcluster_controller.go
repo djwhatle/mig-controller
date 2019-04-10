@@ -19,6 +19,7 @@ package migcluster
 import (
 	"context"
 	"fmt"
+
 	migapi "github.com/fusor/mig-controller/pkg/apis/migration/v1alpha1"
 	migref "github.com/fusor/mig-controller/pkg/reference"
 	"github.com/fusor/mig-controller/pkg/util"
@@ -129,10 +130,6 @@ func (r *ReconcileMigCluster) Reconcile(request reconcile.Request) (reconcile.Re
 		return reconcile.Result{}, err // requeue
 	}
 
-	// Check if this cluster is also hosting the controller
-	isHostCluster := migCluster.Spec.IsHostCluster
-	log.Info(fmt.Sprintf("[mCluster] isHostCluster: [%v]", isHostCluster))
-
 	// Get the SA secret attached to MigCluster
 	saSecretRef := migCluster.Spec.ServiceAccountSecretRef
 	saSecret := &kapi.Secret{}
@@ -171,7 +168,6 @@ func (r *ReconcileMigCluster) Reconcile(request reconcile.Request) (reconcile.Re
 	k8sEndpoints := cluster.Spec.KubernetesAPIEndpoints.ServerEndpoints
 	if len(k8sEndpoints) > 0 {
 		remoteClusterURL = string(k8sEndpoints[0].ServerAddress)
-		log.Info(fmt.Sprintf("[mCluster] remoteClusterURL: [%s]", remoteClusterURL))
 	} else {
 		log.Info(fmt.Sprintf("[mCluster] remoteClusterURL: [len=0]"))
 	}
