@@ -96,13 +96,13 @@ func (r ReconcileMigStorage) validateAwsProvider(storage *migapi.MigStorage) (er
 		fields = append(fields, "awsRegion")
 	}
 	if cfg.AwsPublicURL == "" {
-		fields = append(fields, "awsPublicURL")
+		fields = append(fields, "awsPublicUrl")
 	}
 	if cfg.AwsBucketName == "" {
 		fields = append(fields, "awsBucketName")
 	}
 	if cfg.AwsKmsKeyID == "" {
-		fields = append(fields, "awsKmsKeyID")
+		fields = append(fields, "awsKmsKeyId")
 	}
 	if cfg.AwsSignatureVersion == "" {
 		fields = append(fields, "awsSignatureVersion")
