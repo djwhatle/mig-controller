@@ -25,7 +25,6 @@ import (
 	kapi "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
 	crapi "k8s.io/cluster-registry/pkg/apis/clusterregistry/v1alpha1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
@@ -129,39 +128,6 @@ func (r *ReconcileMigCluster) Reconcile(request reconcile.Request) (reconcile.Re
 		return reconcile.Result{}, err // requeue
 	}
 
-	// Get the SA secret attached to MigCluster
-	saSecretRef := migCluster.Spec.ServiceAccountSecretRef
-	saSecret := &kapi.Secret{}
-	err = r.Get(context.TODO(), types.NamespacedName{Name: saSecretRef.Name, Namespace: saSecretRef.Namespace}, saSecret)
-	if err != nil {
-		if errors.IsNotFound(err) {
-			return reconcile.Result{}, nil // don't requeue
-		}
-		return reconcile.Result{}, err // requeue
-	}
-
-	// Get data from saToken secret
-	saTokenKey := "saToken"
-	saTokenData, ok := saSecret.Data[saTokenKey]
-	if !ok {
-		log.Info(fmt.Sprintf("[mCluster] saToken: [%v]", ok))
-		return reconcile.Result{}, nil // don't requeue
-	}
-	saToken := string(saTokenData)
-	log.Info(fmt.Sprintf("saToken: [%s]", saToken))
-
-	// Get k8s URL from Cluster associated with MigCluster
-	clusterRef := migCluster.Spec.ClusterRef
-	cluster := &crapi.Cluster{}
-
-	err = r.Get(context.TODO(), types.NamespacedName{Name: clusterRef.Name, Namespace: clusterRef.Namespace}, cluster)
-	if err != nil {
-		if errors.IsNotFound(err) {
-			return reconcile.Result{}, nil // don't requeue
-		}
-		return reconcile.Result{}, err // requeue
-	}
-
 	// Create a Remote Watch for this MigCluster if one doesn't exist
 	remoteWatchMap := GetRemoteWatchMap()
 	remoteWatchCluster := remoteWatchMap.Get(request.NamespacedName)
@@ -173,6 +139,7 @@ func (r *ReconcileMigCluster) Reconcile(request reconcile.Request) (reconcile.Re
 		restCfg, err := migCluster.BuildRestConfig(r.Client)
 		if err != nil {
 			log.Error(err, fmt.Sprintf("[mCluster] Error during BuildRestConfig for RemoteWatch on MigCluster [%s/%s]", request.Namespace, request.Name))
+			return reconcile.Result{}, nil // don't requeue
 		}
 
 		StartRemoteWatch(r, RemoteManagerConfig{
