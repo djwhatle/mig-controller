@@ -1,0 +1,104 @@
+module github.com/konveyor/mig-controller
+
+go 1.14
+
+require (
+	cloud.google.com/go v0.37.2
+	github.com/Azure/azure-sdk-for-go v34.1.0+incompatible
+	github.com/Azure/go-autorest v13.2.0+incompatible
+	github.com/appscode/jsonpatch v0.0.0-20190108182946-7c0e3b262f30
+	github.com/aws/aws-sdk-go v1.21.4
+	github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973
+	github.com/davecgh/go-spew v1.1.1
+	github.com/deckarep/golang-set v1.7.1
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/docker/spdystream v0.0.0-20181023171402-6480d4af844c
+	github.com/emicklei/go-restful v2.9.3+incompatible
+	github.com/fsnotify/fsnotify v1.4.7
+	github.com/ghodss/yaml v1.0.0
+	github.com/gin-contrib/cors v1.3.0
+	github.com/gin-contrib/sse v0.1.0
+	github.com/gin-gonic/gin v1.4.0
+	github.com/go-logr/logr v0.1.0
+	github.com/go-logr/zapr v0.1.1
+	github.com/gobuffalo/envy v1.6.15
+	github.com/gogo/protobuf v1.2.1
+	github.com/golang/groupcache v0.0.0-20190129154638-5b532d6fd5ef
+	github.com/golang/protobuf v1.3.1
+	github.com/google/btree v1.0.0
+	github.com/google/gofuzz v0.0.0-20170612174753-24818f796faf
+	github.com/google/uuid v1.1.1
+	github.com/googleapis/gnostic v0.2.0
+	github.com/gregjones/httpcache v0.0.0-20190212212710-3befbb6ad0cc
+	github.com/hashicorp/golang-lru v0.5.1
+	github.com/hpcloud/tail v1.0.0
+	github.com/imdario/mergo v0.3.7
+	github.com/inconshreveable/mousetrap v1.0.0
+	github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af
+	github.com/joho/godotenv v1.3.0
+	github.com/json-iterator/go v1.1.6
+	github.com/konveyor/controller v0.0.0-20200717145344-8b02d7a5c919
+	github.com/konveyor/velero v0.10.2-0.20200805201016-d2b7e756cba8
+	github.com/markbates/inflect v1.0.4
+	github.com/mattn/go-isatty v0.0.10
+	github.com/mattn/go-sqlite3 v1.13.0
+	github.com/matttproud/golang_protobuf_extensions v1.0.1
+	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd
+	github.com/modern-go/reflect2 v0.0.0-20180701023420-4b7aa43c6742
+	github.com/onsi/ginkgo v1.8.0
+	github.com/onsi/gomega v1.5.0
+	github.com/openshift/api v0.0.0-20190322043348-8741ff068a47
+	github.com/openshift/library-go v0.0.0-20200821154433-215f00df72cc
+	github.com/pborman/uuid v0.0.0-20180906182336-adf5a7427709
+	github.com/petar/GoLLRB v0.0.0-20130427215148-53be0d36a84c
+	github.com/peterbourgon/diskv v2.0.1+incompatible
+	github.com/pkg/errors v0.8.1
+	github.com/prometheus/client_golang v0.9.2
+	github.com/prometheus/client_model v0.0.0-20190129233127-fd36f4220a90
+	github.com/prometheus/common v0.2.0
+	github.com/prometheus/procfs v0.0.0-20190328153300-af7bedc223fb
+	github.com/rogpeppe/go-internal v1.2.2
+	github.com/satori/go.uuid v1.2.0
+	github.com/spf13/afero v1.2.2
+	github.com/spf13/cobra v0.0.3
+	github.com/spf13/pflag v1.0.3
+	github.com/ugorji/go v1.1.7
+	go.opencensus.io v0.22.1
+	go.uber.org/atomic v1.3.2
+	go.uber.org/multierr v1.1.0
+	go.uber.org/zap v1.9.1
+	golang.org/x/crypto v0.0.0-20190325154230-a5d413f7728c
+	golang.org/x/net v0.0.0-20190328230028-74de082e2cca
+	golang.org/x/oauth2 v0.0.0-20190319182350-c85d3e98c914
+	golang.org/x/sys v0.0.0-20190402142545-baf5eb976a8c
+	golang.org/x/text v0.3.0
+	golang.org/x/time v0.0.0-20190308202827-9d24e82272b4
+	golang.org/x/tools v0.0.0-20190402160749-c5ac96b4c419
+	google.golang.org/api v0.10.0
+	google.golang.org/appengine v1.5.0
+	google.golang.org/genproto v0.0.0-20190927181202-20e1ac93f88c
+	google.golang.org/grpc v1.24.0
+	gopkg.in/go-playground/validator.v8 v8.18.2
+	gopkg.in/inf.v0 v0.9.1
+	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7
+	gopkg.in/yaml.v2 v2.2.2
+	k8s.io/api v0.0.0-20181204000039-89a74a8d264d
+	k8s.io/apiextensions-apiserver v0.0.0-20181204003920-20c909e7c8c3
+	k8s.io/apimachinery v0.0.0-20181127025237-2b1284ed4c93
+	k8s.io/apiserver v0.17.9
+	k8s.io/client-go v10.0.0+incompatible
+	k8s.io/cluster-registry v0.0.6
+	k8s.io/code-generator v0.0.0-20190311155051-e4c2b1329cf7
+	k8s.io/gengo v0.0.0-20190327210449-e17681d19d3a
+	k8s.io/klog v0.2.0
+	k8s.io/kube-openapi v0.0.0-20190401085232-94e1e7b7574c
+	k8s.io/utils v0.0.0-20200317230726-138672cc43f8
+	sigs.k8s.io/controller-runtime v0.1.10
+	sigs.k8s.io/controller-tools v0.1.10
+	sigs.k8s.io/testing_frameworks v0.1.1
+	sigs.k8s.io/yaml v1.1.0
+)
+
+replace gopkg.in/fsnotify.v1 v1.4.7 => github.com/fsnotify/fsnotify v1.4.7
+
+replace github.com/vmware-tanzu/velero d2b7e756cba85db42b91628f2dd1d43a7d22e7cb => github.com/konveyor/velero v0.10.2-0.20200805201016-d2b7e756cba8
