@@ -117,8 +117,6 @@ func (r *ReconcileDirectVolumeMigration) Reconcile(request reconcile.Request) (r
 	if r.uidGenerationMap.IsCacheStale(direct.UID, direct.Generation) {
 		return reconcile.Result{Requeue: true}, nil
 	}
-	// Record reconciled generation
-	defer r.uidGenerationMap.RecordReconciledGeneration(direct.UID, direct.Generation)
 
 	// Set up jaeger tracing
 	reconcileSpan := r.initTracer(direct)
@@ -171,6 +169,9 @@ func (r *ReconcileDirectVolumeMigration) Reconcile(request reconcile.Request) (r
 		log.Trace(err)
 		return reconcile.Result{Requeue: true}, nil
 	}
+
+	// Record reconciled generation
+	r.uidGenerationMap.RecordReconciledGeneration(direct.UID, direct.Generation)
 
 	// Requeue
 	if requeueAfter > 0 {

@@ -149,8 +149,6 @@ func (r *ReconcileMigAnalytic) Reconcile(request reconcile.Request) (reconcile.R
 	if r.uidGenerationMap.IsCacheStale(analytic.UID, analytic.Generation) {
 		return reconcile.Result{Requeue: true}, nil
 	}
-	// Record reconciled generation
-	defer r.uidGenerationMap.RecordReconciledGeneration(analytic.UID, analytic.Generation)
 
 	// Exit early if the MigAnalytic already has a ready condition
 	// and Refresh boolean is unset
@@ -223,6 +221,9 @@ func (r *ReconcileMigAnalytic) Reconcile(request reconcile.Request) (reconcile.R
 		log.Trace(err)
 		return reconcile.Result{Requeue: true}, nil
 	}
+
+	// Record reconciled generation
+	r.uidGenerationMap.RecordReconciledGeneration(analytic.UID, analytic.Generation)
 
 	// Done
 	return reconcile.Result{Requeue: false}, nil

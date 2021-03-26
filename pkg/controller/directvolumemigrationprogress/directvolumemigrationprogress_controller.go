@@ -147,8 +147,6 @@ func (r *ReconcileDirectVolumeMigrationProgress) Reconcile(request reconcile.Req
 	if r.uidGenerationMap.IsCacheStale(pvProgress.UID, pvProgress.Generation) {
 		return reconcile.Result{Requeue: true}, nil
 	}
-	// Record reconciled generation
-	defer r.uidGenerationMap.RecordReconciledGeneration(pvProgress.UID, pvProgress.Generation)
 
 	// Set up jaeger tracing
 	reconcileSpan, err := r.initTracer(*pvProgress)
@@ -191,7 +189,10 @@ func (r *ReconcileDirectVolumeMigrationProgress) Reconcile(request reconcile.Req
 		return reconcile.Result{Requeue: true}, nil
 	}
 
-	// we will requeue this every 5 seconds
+	// Record reconciled generation
+	r.uidGenerationMap.RecordReconciledGeneration(pvProgress.UID, pvProgress.Generation)
+
+	// Requeue every 5 seconds
 	return reconcile.Result{Requeue: true, RequeueAfter: time.Second * 5}, nil
 }
 

@@ -104,8 +104,6 @@ func (r *ReconcileMigHook) Reconcile(request reconcile.Request) (reconcile.Resul
 	if r.uidGenerationMap.IsCacheStale(hook.UID, hook.Generation) {
 		return reconcile.Result{Requeue: true}, nil
 	}
-	// Record reconciled generation
-	defer r.uidGenerationMap.RecordReconciledGeneration(hook.UID, hook.Generation)
 
 	// Report reconcile error.
 	defer func() {
@@ -147,6 +145,9 @@ func (r *ReconcileMigHook) Reconcile(request reconcile.Request) (reconcile.Resul
 		log.Trace(err)
 		return reconcile.Result{Requeue: true}, nil
 	}
+
+	// Record reconciled generation
+	r.uidGenerationMap.RecordReconciledGeneration(hook.UID, hook.Generation)
 
 	// Done
 	return reconcile.Result{Requeue: false}, nil

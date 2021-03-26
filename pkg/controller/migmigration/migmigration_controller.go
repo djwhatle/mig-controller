@@ -174,8 +174,6 @@ func (r *ReconcileMigMigration) Reconcile(request reconcile.Request) (reconcile.
 	if r.uidGenerationMap.IsCacheStale(migration.UID, migration.Generation) {
 		return reconcile.Result{Requeue: true}, nil
 	}
-	// Record reconciled generation
-	defer r.uidGenerationMap.RecordReconciledGeneration(migration.UID, migration.Generation)
 
 	// Get jaeger spans for migration and reconcile
 	_, reconcileSpan := r.initTracer(migration)
@@ -275,6 +273,9 @@ func (r *ReconcileMigMigration) Reconcile(request reconcile.Request) (reconcile.
 		log.Trace(err)
 		return reconcile.Result{Requeue: true}, nil
 	}
+
+	// Record reconciled generation
+	r.uidGenerationMap.RecordReconciledGeneration(migration.UID, migration.Generation)
 
 	// Requeue
 	if requeueAfter > 0 {

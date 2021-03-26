@@ -130,8 +130,6 @@ func (r *ReconcileMigStorage) Reconcile(request reconcile.Request) (reconcile.Re
 	if r.uidGenerationMap.IsCacheStale(storage.UID, storage.Generation) {
 		return reconcile.Result{Requeue: true}, nil
 	}
-	// Record reconciled generation
-	defer r.uidGenerationMap.RecordReconciledGeneration(storage.UID, storage.Generation)
 
 	// Report reconcile error.
 	defer func() {
@@ -176,6 +174,9 @@ func (r *ReconcileMigStorage) Reconcile(request reconcile.Request) (reconcile.Re
 		log.Trace(err)
 		return reconcile.Result{Requeue: true}, nil
 	}
+
+	// Record reconciled generation
+	r.uidGenerationMap.RecordReconciledGeneration(storage.UID, storage.Generation)
 
 	// Done
 	return reconcile.Result{Requeue: false}, nil

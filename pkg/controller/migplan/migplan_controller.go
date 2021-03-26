@@ -204,8 +204,6 @@ func (r *ReconcileMigPlan) Reconcile(request reconcile.Request) (reconcile.Resul
 	if r.uidGenerationMap.IsCacheStale(plan.UID, plan.Generation) {
 		return reconcile.Result{Requeue: true}, nil
 	}
-	// Record reconciled generation
-	defer r.uidGenerationMap.RecordReconciledGeneration(plan.UID, plan.Generation)
 
 	// Report reconcile error.
 	defer func() {
@@ -331,6 +329,9 @@ func (r *ReconcileMigPlan) Reconcile(request reconcile.Request) (reconcile.Resul
 		log.Trace(err)
 		return reconcile.Result{Requeue: true}, nil
 	}
+
+	// Record reconciled generation
+	r.uidGenerationMap.RecordReconciledGeneration(plan.UID, plan.Generation)
 
 	// Timed requeue on Plan conflict.
 	if plan.Status.HasCondition(PlanConflict) {

@@ -133,8 +133,6 @@ func (r *ReconcileDirectImageMigration) Reconcile(request reconcile.Request) (re
 	if r.uidGenerationMap.IsCacheStale(imageMigration.UID, imageMigration.Generation) {
 		return reconcile.Result{Requeue: true}, nil
 	}
-	// Record reconciled generation
-	defer r.uidGenerationMap.RecordReconciledGeneration(imageMigration.UID, imageMigration.Generation)
 
 	// Set up jaeger tracing
 	reconcileSpan := r.initTracer(imageMigration)
@@ -184,6 +182,9 @@ func (r *ReconcileDirectImageMigration) Reconcile(request reconcile.Request) (re
 		log.Trace(err)
 		return reconcile.Result{Requeue: true}, nil
 	}
+
+	// Record reconciled generation
+	r.uidGenerationMap.RecordReconciledGeneration(imageMigration.UID, imageMigration.Generation)
 
 	// Requeue
 	if requeueAfter > 0 {
