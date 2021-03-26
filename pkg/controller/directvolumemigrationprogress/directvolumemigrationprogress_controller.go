@@ -25,6 +25,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/konveyor/mig-controller/pkg/cache"
 	"github.com/konveyor/mig-controller/pkg/errorutil"
 	"github.com/opentracing/opentracing-go"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -78,7 +79,11 @@ func Add(mgr manager.Manager) error {
 
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
-	return &ReconcileDirectVolumeMigrationProgress{Client: mgr.GetClient(), scheme: mgr.GetScheme()}
+	return &ReconcileDirectVolumeMigrationProgress{
+		Client:           mgr.GetClient(),
+		scheme:           mgr.GetScheme(),
+		uidGenerationMap: cache.CreateUIDToGenerationMap(),
+	}
 }
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
@@ -113,8 +118,9 @@ var _ reconcile.Reconciler = &ReconcileDirectVolumeMigrationProgress{}
 // ReconcileDirectVolumeMigrationProgress reconciles a DirectVolumeMigrationProgress object
 type ReconcileDirectVolumeMigrationProgress struct {
 	client.Client
-	scheme *runtime.Scheme
-	tracer opentracing.Tracer
+	scheme           *runtime.Scheme
+	tracer           opentracing.Tracer
+	uidGenerationMap *cache.UIDToGenerationMap
 }
 
 // Reconcile reads that state of the cluster for a DirectVolumeMigrationProgress object and makes changes based on the state read
@@ -136,6 +142,13 @@ func (r *ReconcileDirectVolumeMigrationProgress) Reconcile(request reconcile.Req
 		}
 		return reconcile.Result{Requeue: true}, err
 	}
+
+	// Check if cache is still catching up
+	if r.uidGenerationMap.IsCacheStale(pvProgress.UID, pvProgress.Generation) {
+		return reconcile.Result{Requeue: true}, nil
+	}
+	// Record reconciled generation
+	defer r.uidGenerationMap.RecordReconciledGeneration(pvProgress.UID, pvProgress.Generation)
 
 	// Set up jaeger tracing
 	reconcileSpan, err := r.initTracer(*pvProgress)

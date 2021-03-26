@@ -22,6 +22,7 @@ import (
 
 	"github.com/konveyor/controller/pkg/logging"
 	migapi "github.com/konveyor/mig-controller/pkg/apis/migration/v1alpha1"
+	"github.com/konveyor/mig-controller/pkg/cache"
 	migref "github.com/konveyor/mig-controller/pkg/reference"
 	"github.com/opentracing/opentracing-go"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -46,9 +47,10 @@ func Add(mgr manager.Manager) error {
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 	return &ReconcileDirectImageStreamMigration{
-		Client:        mgr.GetClient(),
-		scheme:        mgr.GetScheme(),
-		EventRecorder: mgr.GetRecorder("directimagestreammigration_controller"),
+		Client:           mgr.GetClient(),
+		scheme:           mgr.GetScheme(),
+		EventRecorder:    mgr.GetRecorder("directimagestreammigration_controller"),
+		uidGenerationMap: cache.CreateUIDToGenerationMap(),
 	}
 }
 
@@ -90,8 +92,9 @@ var _ reconcile.Reconciler = &ReconcileDirectImageStreamMigration{}
 type ReconcileDirectImageStreamMigration struct {
 	client.Client
 	record.EventRecorder
-	scheme *runtime.Scheme
-	tracer opentracing.Tracer
+	scheme           *runtime.Scheme
+	tracer           opentracing.Tracer
+	uidGenerationMap *cache.UIDToGenerationMap
 }
 
 // Reconcile reads that state of the cluster for a DirectImageStreamMigration object and makes changes based on the state read
@@ -116,6 +119,14 @@ func (r *ReconcileDirectImageStreamMigration) Reconcile(request reconcile.Reques
 		// Error reading the object - requeue the request.
 		return reconcile.Result{Requeue: true}, err
 	}
+
+	// Check if cache is still catching up
+	if r.uidGenerationMap.IsCacheStale(imageStreamMigration.UID, imageStreamMigration.Generation) {
+		return reconcile.Result{Requeue: true}, nil
+	}
+	// Record reconciled generation
+	defer r.uidGenerationMap.RecordReconciledGeneration(
+		imageStreamMigration.UID, imageStreamMigration.Generation)
 
 	// Set up jaeger tracing
 	reconcileSpan, err := r.initTracer(*imageStreamMigration)

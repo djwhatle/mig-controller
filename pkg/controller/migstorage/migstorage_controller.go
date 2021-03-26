@@ -20,6 +20,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/konveyor/mig-controller/pkg/cache"
 	"github.com/konveyor/mig-controller/pkg/errorutil"
 
 	"github.com/konveyor/controller/pkg/logging"
@@ -47,7 +48,12 @@ func Add(mgr manager.Manager) error {
 
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
-	return &ReconcileMigStorage{Client: mgr.GetClient(), scheme: mgr.GetScheme(), EventRecorder: mgr.GetRecorder("migstorage_controller")}
+	return &ReconcileMigStorage{
+		Client:           mgr.GetClient(),
+		scheme:           mgr.GetScheme(),
+		EventRecorder:    mgr.GetRecorder("migstorage_controller"),
+		uidGenerationMap: cache.CreateUIDToGenerationMap(),
+	}
 }
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
@@ -100,7 +106,8 @@ type ReconcileMigStorage struct {
 	client.Client
 	record.EventRecorder
 
-	scheme *runtime.Scheme
+	scheme           *runtime.Scheme
+	uidGenerationMap *cache.UIDToGenerationMap
 }
 
 func (r *ReconcileMigStorage) Reconcile(request reconcile.Request) (reconcile.Result, error) {
@@ -118,6 +125,13 @@ func (r *ReconcileMigStorage) Reconcile(request reconcile.Request) (reconcile.Re
 		log.Trace(err)
 		return reconcile.Result{Requeue: true}, nil
 	}
+
+	// Check if cache is still catching up
+	if r.uidGenerationMap.IsCacheStale(storage.UID, storage.Generation) {
+		return reconcile.Result{Requeue: true}, nil
+	}
+	// Record reconciled generation
+	defer r.uidGenerationMap.RecordReconciledGeneration(storage.UID, storage.Generation)
 
 	// Report reconcile error.
 	defer func() {
