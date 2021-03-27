@@ -20,6 +20,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	golog "log"
 	"strconv"
 	"strings"
 	"time"
@@ -46,10 +47,17 @@ import (
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+func init() {
+	clientMap = make(map[types.UID]compat.Client)
+}
+
 // SA secret keys.
 const (
 	SaToken = "saToken"
 )
+
+var createClientTotal int
+var clientMap map[types.UID]compat.Client
 
 // migration-cluster-config configmap
 const (
@@ -148,15 +156,30 @@ func (m *MigCluster) GetServiceAccountSecret(client k8sclient.Client) (*kapi.Sec
 
 // GetClient get a local or remote client using a MigCluster and an existing client
 func (m *MigCluster) GetClient(c k8sclient.Client) (compat.Client, error) {
+	// nanoToMilli := 1e6
+	start := time.Now()
+	client, ok := clientMap[m.UID]
+	if ok {
+		elapsed := time.Since(start)
+		createClientTotal += int(elapsed.Milliseconds())
+		golog.Print(fmt.Sprintf("[CACHE HIT][!!!] MigCluster GetClient %v", elapsed))
+		golog.Print(fmt.Sprintf("[CACHE HIT][!!!] MigCluster GetClient total milliseconds %v", createClientTotal))
+		return client, nil
+	}
 	restConfig, err := m.BuildRestConfig(c)
 	if err != nil {
 		return nil, err
 	}
-	client, err := compat.NewClient(restConfig)
+	client, err = compat.NewClient(restConfig)
 	if err != nil {
 		return nil, err
 	}
 
+	elapsed := time.Since(start)
+	createClientTotal += int(elapsed.Milliseconds())
+	golog.Print(fmt.Sprintf("[!!!] MigCluster GetClient %v", elapsed))
+	golog.Print(fmt.Sprintf("[!!!] MigCluster GetClient total milliseconds %v", createClientTotal))
+	clientMap[m.UID] = client
 	return client, nil
 }
 
